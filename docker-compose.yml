@@ -1,21 +1,20 @@
 version: '3.8'
 
 services:
-  
+
   db:
     image: postgres:15-alpine
     container_name: fastapi_db
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: secret_pass
-      POSTGRES_DB: fastapi_lab
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  
   web:
     build: .
     container_name: fastapi_web
@@ -23,15 +22,11 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      
       - .:/workspace
-    
     working_dir: /workspace
     environment:
-      - DATABASE_URL=postgresql://postgres:mysecretpassword@db:5432/fastapi_dev_db
-      
-      - PYTHONPATH=/workspace
-    
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      PYTHONPATH: /workspace
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
       - db
