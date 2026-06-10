@@ -1,21 +1,21 @@
 version: '3.8'
 
 services:
-  # Контейнер з Базою Даних (PostgreSQL)
+  
   db:
     image: postgres:15-alpine
     container_name: fastapi_db
     restart: always
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: mysecretpassword
-      POSTGRES_DB: fastapi_dev_db
+      POSTGRES_PASSWORD: secret_pass
+      POSTGRES_DB: fastapi_lab
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # Контейнер з нашим FastAPI додатком
+  
   web:
     build: .
     container_name: fastapi_web
@@ -23,15 +23,15 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      # Монтуємо весь корінь проєкту (де Dockerfile та папка app) у папку /workspace контейнера
+      
       - .:/workspace
-    # Зсуваємо робочу директорію Uvicorn на рівень вище, щоб він бачив 'app' як модуль
+    
     working_dir: /workspace
     environment:
       - DATABASE_URL=postgresql://postgres:mysecretpassword@db:5432/fastapi_dev_db
-      # Примусово додаємо корінь /workspace в шляхи пошуку модулів Python
+      
       - PYTHONPATH=/workspace
-    # Запускаємо uvicorn, вказуючи модуль відносно /workspace
+    
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
       - db
