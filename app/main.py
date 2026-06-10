@@ -2,15 +2,12 @@ from fastapi import FastAPI
 
 from app.api.router import api_router
 
-app = FastAPI(
-    title="FastAPI Lab 3 - CRUD & Routing",
-    description="Синиця Назар, група 32-ІСТ",
-    version="1.0.0"
-)
+
+app = FastAPI(title="FastAPI Lab 5", version="1.0.0")
 
 
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(api_router)
 
 @app.get("/")
-def root():
-    return {"message": "Welcome to FastAPI CRUD Application! Go to /docs for Swagger UI."}
+async def root():
+    return {"status": "ok", "message": "Server is running"}

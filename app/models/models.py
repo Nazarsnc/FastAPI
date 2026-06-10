@@ -11,7 +11,7 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(100))
     email: Mapped[str] = mapped_column(String(100), unique=True, index=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-
+    hashed_password: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     
     profile: Mapped["UserProfile"] = relationship("UserProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
     
