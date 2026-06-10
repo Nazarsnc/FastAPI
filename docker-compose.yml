@@ -23,10 +23,16 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./src:/app/src
+      # Монтуємо весь корінь проєкту (де Dockerfile та папка app) у папку /workspace контейнера
+      - .:/workspace
+    # Зсуваємо робочу директорію Uvicorn на рівень вище, щоб він бачив 'app' як модуль
+    working_dir: /workspace
     environment:
       - DATABASE_URL=postgresql://postgres:mysecretpassword@db:5432/fastapi_dev_db
-    command: uvicorn fastapi_template.main:app --host 0.0.0.0 --port 8000 --app-dir src --reload
+      # Примусово додаємо корінь /workspace в шляхи пошуку модулів Python
+      - PYTHONPATH=/workspace
+    # Запускаємо uvicorn, вказуючи модуль відносно /workspace
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
       - db
 

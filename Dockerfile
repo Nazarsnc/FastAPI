@@ -1,27 +1,29 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
 
-# Встановлюємо робочу директорію
 WORKDIR /app
 
-# Забороняємо Python писати файли .pyc та вмикаємо буферизацію логів
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+# Встановлюємо системні залежності
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/list/apt/lists/*
 
 # Встановлюємо Poetry
 RUN pip install --no-cache-dir poetry
 
-# Вимикаємо створення віртуальних середовищ всередині контейнера (Poetry ставитиме все системно)
+# Вимикаємо створення віртуальних середовищ всередині контейнера
 RUN poetry config virtualenvs.create false
 
-# Копіюємо конфігураційні файли Poetry
-COPY pyproject.toml poetry.lock* /app/
+# Копіюємо конфіги залежностей
+COPY pyproject.toml poetry.lock* ./
 
 # Встановлюємо залежності проєкту
 RUN poetry install --no-interaction --no-ansi --no-root
 
-# Копіюємо код проєкту
-COPY src /app/src
-COPY README.md /app/
+# Копіюємо всю папку app в контейнер
+COPY ./app ./app
 
-# Запуск сервера (для прод-версії без автоперезавантаження)
-CMD ["uvicorn", "fastapi_template.main:app", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "src"]
+# Зміна 1: Копіюємо нашу офіційну точку входу в контейнер
+COPY ./run.py ./run.py
+
+# Зміна 2: Запускаємо додаток НЕ через uvicorn напряму, а ЧЕРЕЗ ТОЧКУ ВХОДУ Python
+CMD ["python", "run.py"]
